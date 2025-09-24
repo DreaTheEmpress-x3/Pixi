@@ -4,9 +4,13 @@ import { Sprite, Texture } from "pixi.js";
 import { Howl } from "howler";
 // import { sound } from "@pixi/sound";
 import gsap from "gsap";
+import Enemy from "./Enemy";
 
 class Game {
   constructor(assets) {
+
+    this.enemy
+
     console.log("Game ready");
     let myStage = new Stage();
 
@@ -40,6 +44,11 @@ class Game {
     this.scene.addChild(play);
 
     play.on("pointerdown", (event) => {
+
+      event.stopPropagation();
+
+      this.enemy = new Enemy(assets, this.scene);
+
       event.stopPropagation();
       this.si.app.stage.eventMode = "static";
       gsap.to(event.currentTarget, {
@@ -58,6 +67,7 @@ class Game {
     });
 
     this.si.app.stage.on("pointerdown", (event) => {
+
       this.hitSound = new Howl({
         src: ["../assets/sound/effekt_swish.mp3"],
         volume: 0.5,
