@@ -63,18 +63,33 @@ class Enemy {
         if (animation.state.hasAnimation("walk")) {
           animation.state.setAnimation(0, "walk", true);
           // dont run too fast
-          animation.state.timeScale = .8;
+          animation.state.timeScale = 0.8;
           animation.autoUpdate = true;
-          }
+        }
 
-          gsap.to(this.enemyContainer, {
-            duration: this.enemyContainer.data,
-            x: this.settings.endAt,
-          });
+        const hitarea = new PIXI.Graphics();
+        hitarea.beginFill(0xde3249);
+        hitarea.drawRect(-25, -75, 50, 50);
+        hitarea.alpha = 0.3;
+        hitarea.endFill();
+        this.enemyContainer.addChild(hitarea);
+
+        gsap.to(this.enemyContainer, {
+          duration: this.enemyContainer.data,
+          x: this.settings.endAt,
+          ease: "Power0.easeNone",
+          onComplete: () => {
+            scene.removeChild(this.settings.enemyArray[0]);
+            this.settings.enemyArray.shift();
+          },
+        });
       },
       1000,
       5000
     );
+  }
+  get enemies() {
+    return this.settings.enemyArray;
   }
 }
 

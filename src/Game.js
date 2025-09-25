@@ -5,11 +5,13 @@ import { Howl } from "howler";
 // import { sound } from "@pixi/sound";
 import gsap from "gsap";
 import Enemy from "./Enemy";
+import Hittest from "./Hittest.js";
 
 class Game {
   constructor(assets) {
+    this.enemy;
 
-    this.enemy
+    this.ht = new Hittest();
 
     console.log("Game ready");
     let myStage = new Stage();
@@ -44,7 +46,6 @@ class Game {
     this.scene.addChild(play);
 
     play.on("pointerdown", (event) => {
-
       event.stopPropagation();
 
       this.enemy = new Enemy(assets, this.scene);
@@ -67,7 +68,6 @@ class Game {
     });
 
     this.si.app.stage.on("pointerdown", (event) => {
-
       this.hitSound = new Howl({
         src: ["../assets/sound/bonk-sound-effect-36055.mp3"],
         volume: 0.5,
@@ -99,7 +99,24 @@ class Game {
         },
       });
     });
-  }
+
+    let ticker = PIXI.Ticker.shared;
+    ticker.add((delta) => {
+      console.log("ticker");
+      if (this.enemy != undefined) {
+        this.enemy.enemies.forEach((_enemy) => {
+          if (this.ht.checkme(ninja, _enemy.getChildAt(1))) {
+            console.log("HIT");
+
+            const currentEnemySpriteSheet = _enemy.getChildAt(0);
+            console.log(currentEnemySpriteSheet);
+
+            currentEnemySpriteSheet.state.setAnimation(0, "die", true);
+          }
+        });
+      }
+    });
+  } //end constructor
 }
 
 export default Game;
