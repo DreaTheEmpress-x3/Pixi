@@ -69,7 +69,7 @@ class Game {
     this.si.app.stage.on("pointerdown", (event) => {
 
       this.hitSound = new Howl({
-        src: ["../assets/sound/effekt_swish.mp3"],
+        src: ["../assets/sound/bonk-sound-effect-36055.mp3"],
         volume: 0.5,
       });
       this.hitSound.play();
