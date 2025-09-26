@@ -1,23 +1,15 @@
 import Stage from "./Stage.js";
 import * as PIXI from "pixi.js";
-import { Sprite, Texture } from "pixi.js";
-import { Howl } from "howler";
-// import { sound } from "@pixi/sound";
-import gsap from "gsap";
-import Enemy from "./Enemy";
+import { Sprite } from "pixi.js";
 import Hittest from "./Hittest.js";
+import Ia from "./Ia.js";
+import setupGameTicker from "./GameTicker.js";
+import setupCharacterMover from "./setupCharacterMover.js";
+import setupPlayMover from "./setupPlayMover.js";
 
 class Game {
   constructor(assets) {
-
-    this.SoundArray=["ia1", "ia2"];
-
-    let getFromSoundArray = this.SoundArray[Math.floor(Math.random()*this.SoundArray.length)];
-    this.ia = new Howl({
-      src: [`./assets/sound/`+getFromSoundArray +`.mp3`],
-      volume: 0.2,
-    });
-    this.ia.play();
+    this.ia = new Ia();
 
     this.enemy;
 
@@ -55,102 +47,29 @@ class Game {
     play.buttonMode = true;
     this.scene.addChild(play);
 
-    play.on("pointerdown", (event) => {
-      event.stopPropagation();
+    setupPlayMover({
+      play, 
+      ninja,
+      scene: this.scene,
+      assets,
+      si: this.si,
+      setEnemy: (enemy) => { this.enemy = enemy; }
+    })
 
-      this.enemy = new Enemy(assets, this.scene);
-
-      event.stopPropagation();
-      this.si.app.stage.eventMode = "static";
-      gsap.to(event.currentTarget, {
-        duration: 0.5,
-        delay: 0.2,
-        y: play.y - 350,
-        ease: "Elastic.easeInOut",
-      });
-      let soundSwirp = new Howl({
-        src: ["./assets/sound/effekt_swish.mp3"],
-        volume: 0.2,
-      });
-      let timerid = setTimeout(() => {
-        soundSwirp.play();
-      }, 500);
+    setupCharacterMover({
+      appStage: this.si.app.stage,
+      ninja,
+      ia: this.ia,
+      background,
+      appWidth: this.si.appWidth,
     });
 
-    this.si.app.stage.on("pointerdown", (event) => {
-      this.hitSound = new Howl({
-        src: ["../assets/sound/bonk-sound-effect-36055.mp3"],
-        volume: 0.5,
-      });
-      this.hitSound.play();
-
-      ninja.stop();
-
-      ninja.texture = Texture.from("../assets/images/ninja-jump.png");
-
-      let mXPos = event.global.x;
-      mXPos > this.si.appWidth / 2 ? (ninja.scale.x = -1) : (ninja.scale.x = 1);
-
-      let newPosition = event.getLocalPosition(background);
-      gsap.to(ninja, {
-        duration: 0.2,
-        x: newPosition.x - 300,
-        y: newPosition.y,
-        ease: "Circ.easeOut",
-        onComplete: () => {
-          gsap.to(ninja, {
-            duration: 0.2,
-            x: 500,
-            y: 768 - 150,
-            ease: "Circ.easeOut",
-          });
-
-          ninja.play();
-        },
-      });
+    setupGameTicker({
+      ninja,
+      getEnemies: () => (this.enemy ? this.enemy.enemies : []),
+      ht: this.ht,
+      scene: this.scene,
     });
-
-    let ticker = PIXI.Ticker.shared;
-    ticker.add((delta) => {
-      console.log("ticker");
-      if (this.enemy != undefined) {
-        this.enemy.enemies.forEach((_enemy) => {
-          if (this.ht.checkme(ninja, _enemy.getChildAt(1)) && _enemy.alive == true) {
-            console.log("HIT");
-
-            if (_enemy.alive){
-              this.hitSound = new Howl({
-                src:["../assets/sound/goofy-hit.mp3"],
-                volume:0.4,
-              })
-              this.hitSound.play();
-            }
-
-            const currentEnemySpriteSheet = _enemy.getChildAt(0);
-            console.log(currentEnemySpriteSheet);
-
-            currentEnemySpriteSheet.state.setAnimation(0, "die", true);
-
-            let enemyDieTimeline = gsap.timeline({
-              onComplete: () => {
-                this.scene.removeChild(_enemy);
-              },
-            });
-            enemyDieTimeline.to(_enemy, {
-              y: 300,
-              duration: 0.7,
-              ease: "Circ.easeOut",
-            });
-            enemyDieTimeline.to(_enemy, {
-              y: 1200,
-              duration: 0.5,
-              ease: "Circ.easeIn",
-            });
-            _enemy.alive = false;
-          }//end if
-        });//end foreach
-      }//end first if
-    }); // end ticker
   } //end constructor
 }
 
