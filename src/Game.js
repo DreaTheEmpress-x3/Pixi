@@ -6,7 +6,6 @@ import Ia from "./Ia.js";
 import setupGameTicker from "./GameTicker.js";
 import setupCharacterMover from "./setupCharacterMover.js";
 import setupPlayMover from "./setupPlayMover.js";
-// import setupKillBox from "./setupKillBox.js";
 
 class Game {
   constructor(assets) {
