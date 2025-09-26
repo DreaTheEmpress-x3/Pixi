@@ -9,6 +9,16 @@ import Hittest from "./Hittest.js";
 
 class Game {
   constructor(assets) {
+
+    this.SoundArray=["ia1", "ia2"];
+
+    let getFromSoundArray = this.SoundArray[Math.floor(Math.random()*this.SoundArray.length)];
+    this.ia = new Howl({
+      src: [`./assets/sound/`+getFromSoundArray +`.mp3`],
+      volume: 0.2,
+    });
+    this.ia.play();
+
     this.enemy;
 
     this.ht = new Hittest();
@@ -105,17 +115,42 @@ class Game {
       console.log("ticker");
       if (this.enemy != undefined) {
         this.enemy.enemies.forEach((_enemy) => {
-          if (this.ht.checkme(ninja, _enemy.getChildAt(1))) {
+          if (this.ht.checkme(ninja, _enemy.getChildAt(1)) && _enemy.alive == true) {
             console.log("HIT");
+
+            if (_enemy.alive){
+              this.hitSound = new Howl({
+                src:["../assets/sound/goofy-hit.mp3"],
+                volume:0.4,
+              })
+              this.hitSound.play();
+            }
 
             const currentEnemySpriteSheet = _enemy.getChildAt(0);
             console.log(currentEnemySpriteSheet);
 
             currentEnemySpriteSheet.state.setAnimation(0, "die", true);
-          }
-        });
-      }
-    });
+
+            let enemyDieTimeline = gsap.timeline({
+              onComplete: () => {
+                this.scene.removeChild(_enemy);
+              },
+            });
+            enemyDieTimeline.to(_enemy, {
+              y: 300,
+              duration: 0.7,
+              ease: "Circ.easeOut",
+            });
+            enemyDieTimeline.to(_enemy, {
+              y: 1200,
+              duration: 0.5,
+              ease: "Circ.easeIn",
+            });
+            _enemy.alive = false;
+          }//end if
+        });//end foreach
+      }//end first if
+    }); // end ticker
   } //end constructor
 }
 
