@@ -6,6 +6,7 @@ import Ia from "./Ia.js";
 import setupGameTicker from "./GameTicker.js";
 import setupCharacterMover from "./setupCharacterMover.js";
 import setupPlayMover from "./setupPlayMover.js";
+// import setupKillBox from "./setupKillBox.js";
 
 class Game {
   constructor(assets) {
@@ -47,14 +48,23 @@ class Game {
     play.buttonMode = true;
     this.scene.addChild(play);
 
+    this.hitareaNinja = new PIXI.Graphics();
+    this.hitareaNinja.beginFill(0xde3249);
+    this.hitareaNinja.drawRect(-90, -70, 180, 150); //x, y, w, h
+    this.hitareaNinja.alpha = 0.5;
+    this.hitareaNinja.endFill();
+    this.scene.addChild(this.hitareaNinja);
+
     setupPlayMover({
-      play, 
+      play,
       ninja,
       scene: this.scene,
       assets,
       si: this.si,
-      setEnemy: (enemy) => { this.enemy = enemy; }
-    })
+      setEnemy: (enemy) => {
+        this.enemy = enemy;
+      },
+    });
 
     setupCharacterMover({
       appStage: this.si.app.stage,
@@ -69,6 +79,7 @@ class Game {
       getEnemies: () => (this.enemy ? this.enemy.enemies : []),
       ht: this.ht,
       scene: this.scene,
+      hitareaNinja: this.hitareaNinja,
     });
   } //end constructor
 }
